@@ -1,26 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component} from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { getContact } from '../../actions/contactActions';
 
 
-const Update = props => {
+class Update  extends Component {
+  state = {
+    firstName: '',
+    lastName: '',
+    Birthday: '',
+    Age: '',
+    Hobby:'',
+    errors: {}
+  };
 
-const [ user, setUser ] = useState(props.currentUser)
+  componentWillReceiveProps(nextProps,nextState){
+    const { firstName, lastName, Birthday, Age, Hobby } = nextProps.contact;
+    this.setState({
+      firstName,
+      lastName,
+      Birthday,
+      Age,
+      Hobby
+    });
 
-useEffect(
-  () => {
-    setUser(props.currentUser)
-  },
-  [ props ]
-)
-// You can tell React to skip applying an effect if certain values haven’t changed between re-renders. [ props ]
+  }
 
-const handleInputChange = event => {
-  const { name, value } = event.target
+  componentDidMount(){
+    const { id } = this.props.match.params;
+    this.props.getContact(id);
+  }
 
-  setUser({ ...user, [name]: value })
-}
+  onSubmit = (e) => {
+    e.preventDefault();
 
-return (
-          <div  >
+    const { firstName, lastName, Birthday, Age, Hobby } = this.state;
+
+    // Check For Errors
+    if (firstName === '') {
+      this.setState({ errors: { name: 'firstname is required' } });
+      return;
+    }
+
+    if (lastName === '') {
+      this.setState({ errors: { email: 'Email is required' } });
+      return;
+    }
+
+    if (Birthday === '') {
+      this.setState({ errors: { phone: 'Phone is required' } });
+      return;
+    }
+
+    
+    if (Age === '') {
+      this.setState({ errors: { phone: 'Age is required' } });
+      return;
+    }
+
+    
+    if (Hobby === '') {
+      this.setState({ errors: { phone: 'Hobby is required' } });
+      return;
+    }
+
+    const updateContact = {
+      firstName,
+      lastName,
+      Birthday,
+      Age,
+      Hobby
+    };
+
+   
+
+    //// UPDATE CONTACT ////
+
+    // Clear State
+    this.setState({
+      firstName: '',
+      lastName: '',
+      Birthday: '',
+      Age:'',
+      Hobby:'',
+      errors: {}
+    });
+
+    this.props.history.push('/');
+  };
+
+  onChange = e => this.setState({ [e.target.name]: e.target.value });
+
+  render(){
+    const { firstName, lastName, Birthday, Age, Hobby, errors } = this.state;
+     return(
+      <div  >
             <div className="row">
                 <div className="col-md-6">
                    <i className="fas fa-users" /> Welcome Onboard
@@ -29,15 +103,9 @@ return (
               </div>
       
               <div className="card">
-                <div className="card-header">Update Users</div>
+                <div className="card-header">Edit User</div>
                 <div className="card-body row h-75 justify-content-center align-items-center">
-                  <form 
-                  onSubmit={event => {
-                    event.preventDefault()
-            
-                    props.updateUser(user.id, user)
-                  }}
-                  >
+                  <form onSubmit={this.onSubmit}>
                     <div className="form-group">
                       <label htmlFor="firstName">First Name</label>
                       <input
@@ -46,8 +114,9 @@ return (
                         name="firstName"
                         minLength="2"
                         required
-                        value={user.firstName}
-                        onChange={handleInputChange}
+                        value={firstName}
+                        onChange={this.onChange}
+                        error={errors.firstName}
                       />
                     </div>
       
@@ -59,8 +128,9 @@ return (
                         name="lastName"
                         minLength="2"
                         required
-                        value={user.lastName} 
-                        onChange={handleInputChange}
+                        value={lastName} 
+                        onChange={this.onChange}
+                        error={errors.lastName}
                       />
                     </div>
 
@@ -70,11 +140,12 @@ return (
                            name="Birthday" 
                            placeholder="Selected date"
                            type="date" 
-                           //id="prefill"
                            className="form-control datepicker"
+                           data-value="[2015,6,1]"
                            required
-                           value={user.Birthday}
-                           onChange={handleInputChange}
+                           value={Birthday}
+                           onChange={this.onChange}
+                           error={errors.Birthday}
                         />
                         
                     </div>
@@ -87,8 +158,9 @@ return (
                         name="Age"
                         minLength="3"
                         required
-                        value={user.Age}
-                        onChange={handleInputChange}
+                        value={Age}
+                        onChange={this.onChange}
+                        error={errors.Age}
                       />
                     </div>
       
@@ -98,18 +170,19 @@ return (
                         type="text"
                         className="form-control"
                         name="Hobby"
-                        minLength="Hobby"
                         required
-                        value={user.Hobby}
-                        onChange={handleInputChange}
+                        value={Hobby}
+                        onChange={this.onChange}
+                        error={errors.Hobby}
                       />
                     </div>
 
                     
       
+      
                     <input
                       type="submit"
-                      value="update"
+                      value="Update"
                       className="btn btn-primary btn-block"
                     />
                   </form>
@@ -120,8 +193,23 @@ return (
               </div>  
           </div>
         );
-      
-  
+     
+
+
+
+
+  }
+   
 }
 
-export default Update;
+Update.propTypes = {
+  contact: PropTypes.object.isRequired,
+  getContact: PropTypes.func.isRequired
+}
+
+
+const mapStateToProps = (state) => ({
+  contact: state.contact.contact
+});
+
+export default connect(mapStateToProps, { getContact })(Update);

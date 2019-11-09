@@ -1,48 +1,46 @@
-import React from 'react';
+import React, { Component } from 'react';
+import Table from './Table';
+import Navigation from '../Navigation/Navigation';
+import Formuser from '../Formuser/Formuser';
+import { connect } from 'react-redux';
+import propTypes from 'prop-types';
+import { getContact } from '../../actions/contactActions';
 
-const Tables = (props) => (
-  <table className="table table-striped">
-  <thead className="thead-inverse">
-       <tr>
-          <th>firstName</th>
-          <th>lastName</th>
-          <th>Birthday</th>
-          <th>Age</th>
-          <th>Hobby</th>
-          
-          <th />
-       </tr>
-  </thead>
-  <tbody>
-    {props.users.length > 0 ? (
-        props.users.map(user => (
-          <tr key={user.id}>
-           <td>
-             {user.firstName} 
-           </td>
-           <td>{user.lastName}</td>
-           <td>{user.Birthday}</td>
-           <td>{user.Age}</td>
-           <td> {user.Hobby}</td>
 
-           <td>
-             <button
-              onClick={() => {
-                  props.editRow(user)
-                }}
-              className="btn btn-secondary btn-sm">
-             <i className="fas fa-arrow-circle-right" /> Edit
-             </button>
-           </td>
-       </tr>
-    ))
-    ) : (
-      <tr>
-        <td colSpan={3}>No users</td>
-      </tr>
-    )}
- </tbody>
-</table>     
-)
 
-export default Tables;
+class Tables extends Component {
+  componentDidMount(){
+    this.props.getContact();
+  }
+
+  render() {
+    const { contacts } = this.props;
+    return (
+      <React.Fragment>'
+        <Navigation />
+        <Formuser />
+        <h1 className="display-4 mb-2">
+          <span className="text-danger">User</span> Table
+        </h1>
+        {contacts.map(contact => (
+          <Table key={contact.id} contact={contact} />
+        ))}
+      </React.Fragment>
+    );
+  }
+}
+
+Tables.propTypes = {
+  Contacts: propTypes.array.isRequired,
+  getContacts: propTypes.func.isRequired
+ }
+ 
+ const mapStateToProps = (state) => ({
+   contacts: state.contact.contacts
+ });
+ 
+ 
+ export default connect(
+   mapStateToProps,
+   {getContact}
+   )(Tables);

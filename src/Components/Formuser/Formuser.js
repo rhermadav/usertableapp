@@ -1,18 +1,83 @@
-import React, { useState } from 'react';
+import React, { Component} from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { addContact } from '../../actions/contactActions';
+import uuid from 'uuid';
 
-  const Formuser = props => {
 
-  const initialFormState = { id: null, firstName:'',lastName:'',Birthday:'',Age:'',Hobby:'' }
-	const [ user, setUser ] = useState(initialFormState)
+class Formuser  extends Component {
+  state = {
+    firstName: '',
+    lastName: '',
+    Birthday: '',
+    Age: '',
+    Hobby:'',
+    errors: {}
+  };
 
-	const handleInputChange = event => {
-		const { name, value } = event.target
+  onSubmit = (e) => {
+    e.preventDefault();
 
-		setUser({ ...user, [name]: value })
-	}
+    const { firstName, lastName, Birthday, Age, Hobby } = this.state;
 
-return (
-          <div  >
+    // Check For Errors
+    if (firstName === '') {
+      this.setState({ errors: { name: 'firstname is required' } });
+      return;
+    }
+
+    if (lastName === '') {
+      this.setState({ errors: { email: 'Email is required' } });
+      return;
+    }
+
+    if (Birthday === '') {
+      this.setState({ errors: { phone: 'Phone is required' } });
+      return;
+    }
+
+    
+    if (Age === '') {
+      this.setState({ errors: { phone: 'Age is required' } });
+      return;
+    }
+
+    
+    if (Hobby === '') {
+      this.setState({ errors: { phone: 'Hobby is required' } });
+      return;
+    }
+
+    const newContact = {
+      id:uuid(),
+      firstName,
+      lastName,
+      Birthday,
+      Age,
+      Hobby
+    };
+
+    
+    this.props.addContact(newContact);
+    // Clear State
+    this.setState({
+      firstName: '',
+      lastName: '',
+      Birthday: '',
+      Age:'',
+      Hobby:'',
+      errors: {}
+    });
+
+    // this.props.history.push('/');
+  };
+
+  onChange = e => this.setState({ [e.target.name]: e.target.value });
+
+  render(){
+    const { firstName, lastName, Birthday, Age, Hobby, errors } = this.state;
+     return(
+      <div  >
             <div className="row">
                 <div className="col-md-6">
                    <i className="fas fa-users" /> Welcome Onboard
@@ -23,15 +88,7 @@ return (
               <div className="card">
                 <div className="card-header">Add Users</div>
                 <div className="card-body row h-75 justify-content-center align-items-center">
-                  <form 
-                  onSubmit={event => {
-                    event.preventDefault()
-                    if (!user.firstName || !user.lastName) return
-            
-                    props.addUser(user)
-                    setUser(initialFormState)
-                  }}
-                  >
+                  <form onSubmit={this.onSubmit}>
                     <div className="form-group">
                       <label htmlFor="firstName">First Name</label>
                       <input
@@ -40,8 +97,9 @@ return (
                         name="firstName"
                         minLength="2"
                         required
-                        value={user.firstName}
-                        onChange={handleInputChange}
+                        value={firstName}
+                        onChange={this.onChange}
+                        error={errors.firstName}
                       />
                     </div>
       
@@ -53,8 +111,9 @@ return (
                         name="lastName"
                         minLength="2"
                         required
-                        value={user.lastName} 
-                        onChange={handleInputChange}
+                        value={lastName} 
+                        onChange={this.onChange}
+                        error={errors.lastName}
                       />
                     </div>
 
@@ -67,8 +126,9 @@ return (
                            className="form-control datepicker"
                            data-value="[2015,6,1]"
                            required
-                           value={user.Birthday}
-                           onChange={handleInputChange}
+                           value={Birthday}
+                           onChange={this.onChange}
+                           error={errors.Birthday}
                         />
                         
                     </div>
@@ -79,10 +139,11 @@ return (
                         type="text"
                         className="form-control"
                         name="Age"
-                        minLength="3"
+                        minLength="1"
                         required
-                        value={user.Age}
-                        onChange={handleInputChange}
+                        value={Age}
+                        onChange={this.onChange}
+                        error={errors.Age}
                       />
                     </div>
       
@@ -93,8 +154,9 @@ return (
                         className="form-control"
                         name="Hobby"
                         required
-                        value={user.Hobby}
-                        onChange={handleInputChange}
+                        value={Hobby}
+                        onChange={this.onChange}
+                        error={errors.Hobby}
                       />
                     </div>
 
@@ -114,8 +176,13 @@ return (
               </div>  
           </div>
         );
-      
-  
+  }
+    
 }
 
-export default Formuser;
+Formuser.propTypes = {
+  addContact: PropTypes.func.isRequired
+}
+
+
+export default connect(null, { addContact })(Formuser);
